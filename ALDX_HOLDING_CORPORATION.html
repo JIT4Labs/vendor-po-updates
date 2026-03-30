@@ -6,14 +6,20 @@
 <input type="hidden" name="vendor_name" value="ALDX HOLDING CORPORATION">
 <input type="hidden" name="item_count" value="2">
 <input type="hidden" name="item_0_po" value="PO501">
+<input type="hidden" name="item_0_po_id" value="14x126535">
 <input type="hidden" name="item_0_customer" value="Mercedes Scientific">
 <input type="hidden" name="item_0_product" value="Beckman Coulter 81906 Access Substrate">
+<input type="hidden" name="item_0_product_id" value="6x848">
 <input type="hidden" name="item_0_open_qty" value="16">
+<input type="hidden" name="item_0_unit_price" value="37.0">
 <input type="hidden" name="item_0_id" value="PO501_6848">
 <input type="hidden" name="item_1_po" value="PO523">
+<input type="hidden" name="item_1_po_id" value="14x130082">
 <input type="hidden" name="item_1_customer" value="Clearchem">
 <input type="hidden" name="item_1_product" value="Beckman Coulter 472137 Hemolyzing Reagent HbA1c Diluent">
+<input type="hidden" name="item_1_product_id" value="6x801">
 <input type="hidden" name="item_1_open_qty" value="1">
+<input type="hidden" name="item_1_unit_price" value="170.0">
 <input type="hidden" name="item_1_id" value="PO523_6801">
 
 
@@ -23,7 +29,7 @@
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
 <td><span style="font-size:24px;font-weight:700;color:#FFFFFF;letter-spacing:1px;">JIT4You</span><br>
 <span style="font-size:17px;color:#FFFFFF;font-weight:600;">Open Purchase Orders — ALDX HOLDING CORPORATION</span></td>
-<td style="text-align:right;color:#FFFFFF;font-size:13px;font-weight:500;">March 29, 2026</td>
+<td style="text-align:right;color:#FFFFFF;font-size:13px;font-weight:500;">March 30, 2026</td>
 </tr></table></td></tr>
 
 <tr><td style="background:#fff;padding:20px 30px;">
@@ -110,11 +116,16 @@ function submitForm() {
     htmlBody += '<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:13px;">';
     htmlBody += '<tr style="background:#0D2B45;color:#fff;"><th>PO #</th><th>Customer</th><th>Product</th><th>Open Qty</th><th>Expected Date</th><th>Notes</th></tr>';
 
+    var updatedItems = [];
+
     for (var i = 0; i < itemCount; i++) {
         var po = formData.get('item_' + i + '_po');
+        var poId = formData.get('item_' + i + '_po_id');
         var customer = formData.get('item_' + i + '_customer');
         var product = formData.get('item_' + i + '_product');
+        var productId = formData.get('item_' + i + '_product_id');
         var openQty = formData.get('item_' + i + '_open_qty');
+        var unitPrice = formData.get('item_' + i + '_unit_price');
         var itemId = formData.get('item_' + i + '_id');
         var eta = formData.get('eta_' + itemId) || '';
         var note = formData.get('note_' + itemId) || '';
@@ -130,6 +141,17 @@ function submitForm() {
             htmlBody += '<td style="font-weight:600;color:#1F4E79;">' + (eta || '-') + '</td>';
             htmlBody += '<td>' + (note || '-') + '</td>';
             htmlBody += '</tr>';
+
+            updatedItems.push({
+                "po_num": po,
+                "po_id": poId,
+                "product": product,
+                "product_id": productId,
+                "open_qty": openQty,
+                "unit_price": unitPrice,
+                "eta": eta,
+                "note": note
+            });
         }
     }
     htmlBody += '</table></body></html>';
@@ -145,12 +167,14 @@ function submitForm() {
     var payload = {
         "subject": "Vendor ETA Update from " + vendor + " - " + new Date().toLocaleDateString(),
         "html_body": htmlBody,
-        "to": "customersupport@jit4you.com"
+        "to": "customersupport@jit4you.com",
+        "vendor_name": vendor,
+        "items": updatedItems
     };
 
     // Send as text/plain with no-cors to avoid CORS preflight.
     // Zapier parses the JSON body regardless of content-type.
-    fetch("https://hooks.zapier.com/hooks/catch/2373110/un9n9ur/", {
+    fetch("https://hooks.zapier.com/hooks/catch/2373110/uni646j/", {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=UTF-8" },
