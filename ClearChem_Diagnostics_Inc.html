@@ -6,34 +6,52 @@
 <input type="hidden" name="vendor_name" value="ClearChem Diagnostics, Inc">
 <input type="hidden" name="item_count" value="6">
 <input type="hidden" name="item_0_po" value="PO397">
+<input type="hidden" name="item_0_po_id" value="14x119801">
 <input type="hidden" name="item_0_customer" value="3 Alpha Labs, LLC">
 <input type="hidden" name="item_0_product" value="Beckman Coulter A48618 Access SHBG Sex Hormone-Binding Globulin">
+<input type="hidden" name="item_0_product_id" value="6x15591">
 <input type="hidden" name="item_0_open_qty" value="1">
+<input type="hidden" name="item_0_unit_price" value="65.6">
 <input type="hidden" name="item_0_id" value="PO397_615591">
 <input type="hidden" name="item_1_po" value="PO496">
+<input type="hidden" name="item_1_po_id" value="14x125933">
 <input type="hidden" name="item_1_customer" value="ESIC Corp">
 <input type="hidden" name="item_1_product" value="651412 Sample Cups 1000/bg">
+<input type="hidden" name="item_1_product_id" value="6x103466">
 <input type="hidden" name="item_1_open_qty" value="2">
+<input type="hidden" name="item_1_unit_price" value="61.67">
 <input type="hidden" name="item_1_id" value="PO496_6103466">
 <input type="hidden" name="item_2_po" value="PO525">
+<input type="hidden" name="item_2_po_id" value="14x130111">
 <input type="hidden" name="item_2_customer" value="Lucid Labs">
 <input type="hidden" name="item_2_product" value="Beckman Coulter 81906 Access Substrate">
+<input type="hidden" name="item_2_product_id" value="6x848">
 <input type="hidden" name="item_2_open_qty" value="1">
+<input type="hidden" name="item_2_unit_price" value="34.0">
 <input type="hidden" name="item_2_id" value="PO525_6848">
 <input type="hidden" name="item_3_po" value="PO525">
+<input type="hidden" name="item_3_po_id" value="14x130111">
 <input type="hidden" name="item_3_customer" value="Lucid Labs">
 <input type="hidden" name="item_3_product" value="Beckman Coulter A16792 Access Wash Buffer II">
+<input type="hidden" name="item_3_product_id" value="6x853">
 <input type="hidden" name="item_3_open_qty" value="1">
+<input type="hidden" name="item_3_unit_price" value="37.6">
 <input type="hidden" name="item_3_id" value="PO525_6853">
 <input type="hidden" name="item_4_po" value="PO528">
+<input type="hidden" name="item_4_po_id" value="14x130165">
 <input type="hidden" name="item_4_customer" value="Lucid Labs">
 <input type="hidden" name="item_4_product" value="Beckman Coulter DR0070-1 Olympus Lyophilized Chemistry Calibrator Level 1">
+<input type="hidden" name="item_4_product_id" value="6x759">
 <input type="hidden" name="item_4_open_qty" value="1">
+<input type="hidden" name="item_4_unit_price" value="52.9">
 <input type="hidden" name="item_4_id" value="PO528_6759">
 <input type="hidden" name="item_5_po" value="PO528">
+<input type="hidden" name="item_5_po_id" value="14x130165">
 <input type="hidden" name="item_5_customer" value="Lucid Labs">
 <input type="hidden" name="item_5_product" value="Olympus Lyophilized Chemistry Calibrator Beckman Coulter DR0070-2">
+<input type="hidden" name="item_5_product_id" value="6x760">
 <input type="hidden" name="item_5_open_qty" value="1">
+<input type="hidden" name="item_5_unit_price" value="52.9">
 <input type="hidden" name="item_5_id" value="PO528_6760">
 
 
@@ -43,7 +61,7 @@
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
 <td><span style="font-size:24px;font-weight:700;color:#FFFFFF;letter-spacing:1px;">JIT4You</span><br>
 <span style="font-size:17px;color:#FFFFFF;font-weight:600;">Open Purchase Orders — ClearChem Diagnostics, Inc</span></td>
-<td style="text-align:right;color:#FFFFFF;font-size:13px;font-weight:500;">March 29, 2026</td>
+<td style="text-align:right;color:#FFFFFF;font-size:13px;font-weight:500;">March 30, 2026</td>
 </tr></table></td></tr>
 
 <tr><td style="background:#fff;padding:20px 30px;">
@@ -174,11 +192,16 @@ function submitForm() {
     htmlBody += '<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:13px;">';
     htmlBody += '<tr style="background:#0D2B45;color:#fff;"><th>PO #</th><th>Customer</th><th>Product</th><th>Open Qty</th><th>Expected Date</th><th>Notes</th></tr>';
 
+    var updatedItems = [];
+
     for (var i = 0; i < itemCount; i++) {
         var po = formData.get('item_' + i + '_po');
+        var poId = formData.get('item_' + i + '_po_id');
         var customer = formData.get('item_' + i + '_customer');
         var product = formData.get('item_' + i + '_product');
+        var productId = formData.get('item_' + i + '_product_id');
         var openQty = formData.get('item_' + i + '_open_qty');
+        var unitPrice = formData.get('item_' + i + '_unit_price');
         var itemId = formData.get('item_' + i + '_id');
         var eta = formData.get('eta_' + itemId) || '';
         var note = formData.get('note_' + itemId) || '';
@@ -194,6 +217,17 @@ function submitForm() {
             htmlBody += '<td style="font-weight:600;color:#1F4E79;">' + (eta || '-') + '</td>';
             htmlBody += '<td>' + (note || '-') + '</td>';
             htmlBody += '</tr>';
+
+            updatedItems.push({
+                "po_num": po,
+                "po_id": poId,
+                "product": product,
+                "product_id": productId,
+                "open_qty": openQty,
+                "unit_price": unitPrice,
+                "eta": eta,
+                "note": note
+            });
         }
     }
     htmlBody += '</table></body></html>';
@@ -209,12 +243,14 @@ function submitForm() {
     var payload = {
         "subject": "Vendor ETA Update from " + vendor + " - " + new Date().toLocaleDateString(),
         "html_body": htmlBody,
-        "to": "customersupport@jit4you.com"
+        "to": "customersupport@jit4you.com",
+        "vendor_name": vendor,
+        "items": updatedItems
     };
 
     // Send as text/plain with no-cors to avoid CORS preflight.
     // Zapier parses the JSON body regardless of content-type.
-    fetch("https://hooks.zapier.com/hooks/catch/2373110/un9n9ur/", {
+    fetch("https://hooks.zapier.com/hooks/catch/2373110/uni646j/", {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=UTF-8" },
