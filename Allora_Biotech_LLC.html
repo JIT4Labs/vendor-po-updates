@@ -140,34 +140,49 @@ function submitForm() {
         return;
     }
 
-    var payload = {
-        "subject": "Vendor ETA Update from " + vendor + " — " + new Date().toLocaleDateString(),
+    document.getElementById('statusMsg').innerHTML = '<span style="color:#1F4E79;">Sending updates...</span>';
+
+    // Use a hidden iframe + form POST to bypass CORS entirely.
+    // Form submissions are not subject to CORS restrictions.
+    var iframeName = 'submitFrame_' + Date.now();
+    var iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    var hiddenForm = document.createElement('form');
+    hiddenForm.method = 'POST';
+    hiddenForm.action = 'https://hooks.zapier.com/hooks/catch/2373110/un9n9ur/';
+    hiddenForm.target = iframeName;
+    hiddenForm.style.display = 'none';
+
+    var fields = {
+        "subject": "Vendor ETA Update from " + vendor + " - " + new Date().toLocaleDateString(),
         "html_body": htmlBody,
         "to": "customersupport@jit4you.com"
     };
 
-    document.getElementById('statusMsg').innerHTML = '<span style="color:#1F4E79;">Sending updates...</span>';
+    for (var key in fields) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = fields[key];
+        hiddenForm.appendChild(input);
+    }
 
-    // Use no-cors mode to avoid CORS preflight issues with Zapier webhooks.
-    // The request goes through but the response is opaque, so we assume success.
-    fetch("https://hooks.zapier.com/hooks/catch/2373110/un9n9ur/", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload)
-    })
-    .then(function(response) {
-        // In no-cors mode, response.type is "opaque" and response.ok is false,
-        // but the request was sent successfully.
+    document.body.appendChild(hiddenForm);
+    hiddenForm.submit();
+
+    // We can't read the iframe response (cross-origin), so show success after a short delay.
+    setTimeout(function() {
         document.getElementById('statusMsg').innerHTML =
             '<span style="color:#155724;font-weight:600;">&#10003; Updates submitted successfully! Thank you.</span>';
-        document.querySelector('button').disabled = true;
-        document.querySelector('button').style.background = '#999';
-    })
-    .catch(function(err) {
-        document.getElementById('statusMsg').innerHTML =
-            '<span style="color:#c0392b;">Network error. Please try again or email us at customersupport@jit4you.com</span>';
-    });
+        document.querySelector('button[onclick]').disabled = true;
+        document.querySelector('button[onclick]').style.background = '#999';
+        // Clean up
+        document.body.removeChild(iframe);
+        document.body.removeChild(hiddenForm);
+    }, 2000);
 }
 </script>
 </body>
