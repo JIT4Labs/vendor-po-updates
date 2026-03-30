@@ -6,14 +6,20 @@
 <input type="hidden" name="vendor_name" value="Allora Biotech LLC">
 <input type="hidden" name="item_count" value="2">
 <input type="hidden" name="item_0_po" value="PO401">
+<input type="hidden" name="item_0_po_id" value="14x120623">
 <input type="hidden" name="item_0_customer" value="Mercedes Scientific">
 <input type="hidden" name="item_0_product" value="Beckman coulter B93009 Access Hemoglobin HbA1c Reagent Kit">
+<input type="hidden" name="item_0_product_id" value="6x103748">
 <input type="hidden" name="item_0_open_qty" value="2">
+<input type="hidden" name="item_0_unit_price" value="950.0">
 <input type="hidden" name="item_0_id" value="PO401_6103748">
 <input type="hidden" name="item_1_po" value="PO466">
+<input type="hidden" name="item_1_po_id" value="14x123353">
 <input type="hidden" name="item_1_customer" value="TRYCOM INC.">
 <input type="hidden" name="item_1_product" value="Siemens Advia 10312289 TESTpoint Normal (4 x 4mL)">
+<input type="hidden" name="item_1_product_id" value="6x123339">
 <input type="hidden" name="item_1_open_qty" value="1">
+<input type="hidden" name="item_1_unit_price" value="135.0">
 <input type="hidden" name="item_1_id" value="PO466_6123339">
 
 
@@ -110,11 +116,16 @@ function submitForm() {
     htmlBody += '<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:13px;">';
     htmlBody += '<tr style="background:#0D2B45;color:#fff;"><th>PO #</th><th>Customer</th><th>Product</th><th>Open Qty</th><th>Expected Date</th><th>Notes</th></tr>';
 
+    var updatedItems = [];
+
     for (var i = 0; i < itemCount; i++) {
         var po = formData.get('item_' + i + '_po');
+        var poId = formData.get('item_' + i + '_po_id');
         var customer = formData.get('item_' + i + '_customer');
         var product = formData.get('item_' + i + '_product');
+        var productId = formData.get('item_' + i + '_product_id');
         var openQty = formData.get('item_' + i + '_open_qty');
+        var unitPrice = formData.get('item_' + i + '_unit_price');
         var itemId = formData.get('item_' + i + '_id');
         var eta = formData.get('eta_' + itemId) || '';
         var note = formData.get('note_' + itemId) || '';
@@ -130,6 +141,17 @@ function submitForm() {
             htmlBody += '<td style="font-weight:600;color:#1F4E79;">' + (eta || '-') + '</td>';
             htmlBody += '<td>' + (note || '-') + '</td>';
             htmlBody += '</tr>';
+
+            updatedItems.push({
+                "po_num": po,
+                "po_id": poId,
+                "product": product,
+                "product_id": productId,
+                "open_qty": openQty,
+                "unit_price": unitPrice,
+                "eta": eta,
+                "note": note
+            });
         }
     }
     htmlBody += '</table></body></html>';
@@ -145,12 +167,14 @@ function submitForm() {
     var payload = {
         "subject": "Vendor ETA Update from " + vendor + " - " + new Date().toLocaleDateString(),
         "html_body": htmlBody,
-        "to": "customersupport@jit4you.com"
+        "to": "customersupport@jit4you.com",
+        "vendor_name": vendor,
+        "items": updatedItems
     };
 
     // Send as text/plain with no-cors to avoid CORS preflight.
     // Zapier parses the JSON body regardless of content-type.
-    fetch("https://hooks.zapier.com/hooks/catch/2373110/un9n9ur/", {
+    fetch("https://hooks.zapier.com/hooks/catch/2373110/uni646j/", {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=UTF-8" },
