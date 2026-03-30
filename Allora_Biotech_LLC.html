@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>JIT4You - Open PO Update Form â Allora Biotech LLC</title></head>
+<head><meta charset="utf-8"><title>JIT4You - Open PO Update Form — Allora Biotech LLC</title></head>
 <body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f0f2f5;">
 <form id="vendorForm">
 <input type="hidden" name="vendor_name" value="Allora Biotech LLC">
@@ -22,7 +22,7 @@
 <tr><td style="background:#0D2B45;padding:24px 30px;">
 <table width="100%" cellpadding="0" cellspacing="0"><tr>
 <td><span style="font-size:24px;font-weight:700;color:#FFFFFF;letter-spacing:1px;">JIT4You</span><br>
-<span style="font-size:17px;color:#FFFFFF;font-weight:600;">Open Purchase Orders â Allora Biotech LLC</span></td>
+<span style="font-size:17px;color:#FFFFFF;font-weight:600;">Open Purchase Orders — Allora Biotech LLC</span></td>
 <td style="text-align:right;color:#FFFFFF;font-size:13px;font-weight:500;">March 29, 2026</td>
 </tr></table></td></tr>
 
@@ -141,29 +141,28 @@ function submitForm() {
     }
 
     var payload = {
-        "subject": "Vendor ETA Update from " + vendor + " â " + new Date().toLocaleDateString(),
+        "subject": "Vendor ETA Update from " + vendor + " — " + new Date().toLocaleDateString(),
         "html_body": htmlBody,
         "to": "customersupport@jit4you.com"
     };
 
     document.getElementById('statusMsg').innerHTML = '<span style="color:#1F4E79;">Sending updates...</span>';
 
+    // Use no-cors mode to avoid CORS preflight issues with Zapier webhooks.
+    // The request goes through but the response is opaque, so we assume success.
     fetch("https://hooks.zapier.com/hooks/catch/2373110/un9n9ur/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload)
     })
     .then(function(response) {
-        if (response.ok) {
-            document.getElementById('statusMsg').innerHTML =
-                '<span style="color:#155724;font-weight:600;">&#10003; Updates submitted successfully! Thank you.</span>';
-            // Disable the button after successful submission
-            document.querySelector('button').disabled = true;
-            document.querySelector('button').style.background = '#999';
-        } else {
-            document.getElementById('statusMsg').innerHTML =
-                '<span style="color:#c0392b;">Error sending updates. Please try again or contact us at customersupport@jit4you.com</span>';
-        }
+        // In no-cors mode, response.type is "opaque" and response.ok is false,
+        // but the request was sent successfully.
+        document.getElementById('statusMsg').innerHTML =
+            '<span style="color:#155724;font-weight:600;">&#10003; Updates submitted successfully! Thank you.</span>';
+        document.querySelector('button').disabled = true;
+        document.querySelector('button').style.background = '#999';
     })
     .catch(function(err) {
         document.getElementById('statusMsg').innerHTML =
