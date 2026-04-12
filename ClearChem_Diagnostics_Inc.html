@@ -302,7 +302,8 @@ function submitForm() {
         "html_body": htmlBody,
         "to": "customersupport@jit4you.com",
         "vendor_name": vendor,
-        "items": updatedItems
+        "items": updatedItems,
+        "items_json": JSON.stringify(updatedItems)
     };
 
     // Send as text/plain with no-cors to avoid CORS preflight.
