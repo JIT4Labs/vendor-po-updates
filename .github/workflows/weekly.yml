@@ -13,8 +13,8 @@ on:
         required: false
         type: string
         default: ""
-  # schedule:
-  #   - cron: "15 15 * * 1"   # 15:15 UTC Monday = 8:15 AM PDT
+  schedule:
+       - cron: "50 13 * * 1"   # 13:50 UTC Monday = 5:50 AM PST (6:50 AM during DST / PDT)
 
 permissions:
   contents: write
