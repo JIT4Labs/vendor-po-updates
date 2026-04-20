@@ -1,14 +1,23 @@
 name: Weekly Vendor Open PO Report
 
 on:
-  # Manual trigger — used for testing. Schedule is commented out until a
-  # manual run is verified, then uncomment + disable the Cowork task.
   workflow_dispatch:
+    inputs:
+      test_to:
+        description: "Override ALL recipients with this email (leave blank for real vendor emails)"
+        required: false
+        type: string
+        default: ""
+      vendor_filter:
+        description: "Optional: limit to a single vendor name (e.g. ClearChem)"
+        required: false
+        type: string
+        default: ""
   # schedule:
-  #   - cron: "15 15 * * 1"   # 15:15 UTC Monday = 8:15 AM Pacific (PDT); winter drifts to 7:15
+  #   - cron: "15 15 * * 1"   # 15:15 UTC Monday = 8:15 AM PDT
 
 permissions:
-  contents: write   # so the script can push form HTMLs to the repo
+  contents: write
 
 jobs:
   run-report:
@@ -31,4 +40,13 @@ jobs:
           VTIGER_ACCESS_KEY: ${{ secrets.VTIGER_ACCESS_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 vendor_po_report.py
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.test_to }}" ]; then
+            ARGS="$ARGS --test-to ${{ inputs.test_to }}"
+          fi
+          if [ -n "${{ inputs.vendor_filter }}" ]; then
+            ARGS="$ARGS --vendor \"${{ inputs.vendor_filter }}\""
+          fi
+          echo "Running: python3 vendor_po_report.py $ARGS"
+          eval "python3 vendor_po_report.py $ARGS"
