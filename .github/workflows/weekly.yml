@@ -1,0 +1,34 @@
+name: Weekly Vendor Open PO Report
+
+on:
+  # Manual trigger — used for testing. Schedule is commented out until a
+  # manual run is verified, then uncomment + disable the Cowork task.
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "15 15 * * 1"   # 15:15 UTC Monday = 8:15 AM Pacific (PDT); winter drifts to 7:15
+
+permissions:
+  contents: write   # so the script can push form HTMLs to the repo
+
+jobs:
+  run-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run vendor PO report
+        env:
+          VTIGER_USER: ${{ secrets.VTIGER_USER }}
+          VTIGER_ACCESS_KEY: ${{ secrets.VTIGER_ACCESS_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 vendor_po_report.py
