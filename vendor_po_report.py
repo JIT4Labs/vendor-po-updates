@@ -64,8 +64,9 @@ CONFIG = {
     # Vendors to exclude from reports
     "exclude_vendors": ["Conmed"],
 
-    # Rate limiting
-    "delay_between_calls": 0.3,
+    # Rate limiting — Vtiger's secondary rate limit is tight on newer accounts.
+    # 0.5s = 2 req/sec, safe; combined with http_request's 429-retry this is belt-and-suspenders.
+    "delay_between_calls": 0.5,
 
     # Output directory
     "output_dir": os.path.dirname(os.path.abspath(__file__)),
@@ -87,7 +88,8 @@ ctx = ssl.create_default_context()
 # ─────────────────────────────────────────────
 # UTILITY
 # ─────────────────────────────────────────────
-def http_request(url, method="GET", headers=None, data=None, json_body=None):
+def http_request(url, method="GET", headers=None, data=None, json_body=None, max_retries=8):
+    """HTTP helper with exponential-backoff retry on Vtiger's 429 rate limit."""
     if headers is None:
         headers = {}
     if json_body is not None:
@@ -97,15 +99,25 @@ def http_request(url, method="GET", headers=None, data=None, json_body=None):
         data = urllib.parse.urlencode(data).encode("utf-8")
     elif data and isinstance(data, str):
         data = data.encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
-            body = resp.read().decode("utf-8")
-            return json.loads(body) if body.strip() else {}
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8") if e.fp else ""
-        log(f"  HTTP {e.code} error: {error_body[:300]}")
-        raise
+
+    for attempt in range(max_retries):
+        req = urllib.request.Request(url, data=data, headers=headers, method=method)
+        try:
+            with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
+                body = resp.read().decode("utf-8")
+                return json.loads(body) if body.strip() else {}
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < max_retries - 1:
+                wait = min(2 ** attempt, 30)
+                log(f"  Rate limited (429). Waiting {wait}s before retry {attempt + 1}/{max_retries}...")
+                time.sleep(wait)
+                continue
+            error_body = e.read().decode("utf-8") if e.fp else ""
+            log(f"  HTTP {e.code} error: {error_body[:300]}")
+            raise
+    # Exhausted retries — raise the final 429
+    log(f"  FAILED after {max_retries} retries (persistent 429)")
+    raise urllib.error.HTTPError(url, 429, "Too Many Requests (exhausted retries)", {}, None)
 
 
 def log(msg):
